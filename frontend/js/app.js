@@ -1,10 +1,12 @@
-/* Nav pill scroll spy and mobile menu auto-close */
+/* DevNet EcoNav - Interactive Application Script */
 (function () {
     var menu = document.getElementById('navMenu');
-    var links = document.querySelectorAll('#navPills .nav-pill-link');
+    var links = document.querySelectorAll('#navPills .nav-pill-link, a[href^="#"]');
     var items = [];
 
-    links.forEach(function (a) {
+    // Gather targets for scrollspy
+    var navPillLinks = document.querySelectorAll('#navPills .nav-pill-link');
+    navPillLinks.forEach(function (a) {
         var href = a.getAttribute('href');
         if (a.hasAttribute('data-bs-toggle') || !href || href.charAt(0) !== '#' || href.length < 2) return;
         var sec = document.getElementById(href.slice(1));
@@ -36,10 +38,27 @@
     window.addEventListener('resize', onScroll);
     onScroll();
 
+    // Smooth sliding animation for internal links
     links.forEach(function (a) {
-        a.addEventListener('click', function () {
+        a.addEventListener('click', function (e) {
+            var href = a.getAttribute('href');
+
+            // Close mobile collapse if open
             if (menu && menu.classList.contains('show')) {
                 bootstrap.Collapse.getOrCreateInstance(menu).hide();
+            }
+
+            if (!href || href === '#' || href.charAt(0) !== '#' || a.hasAttribute('data-bs-toggle')) return;
+
+            var targetSec = document.getElementById(href.slice(1));
+            if (targetSec) {
+                e.preventDefault();
+                var targetTop = targetSec.getBoundingClientRect().top + window.pageYOffset - 90;
+
+                window.scrollTo({
+                    top: targetTop,
+                    behavior: 'smooth'
+                });
             }
         });
     });

@@ -1,0 +1,212 @@
+/* DevNet EcoNav – Planner Sidebar & Map Styles */
+
+body, html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: var(--font-body);
+    background-color: var(--paper);
+}
+
+/* Fullscreen Map Layer */
+#google_map {
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+}
+
+/* Compact Floating EcoNav Sidebar Panel */
+.planner-sidebar {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 360px;
+    max-width: calc(100vw - 40px);
+    height: auto;
+    max-height: calc(100vh - 40px);
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1.5px solid var(--line);
+    border-radius: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 16px 40px rgba(5, 38, 27, 0.15);
+}
+
+.sidebar-header {
+    padding: 18px 20px 12px;
+    border-bottom: 1px solid var(--line);
+    background: linear-gradient(180deg, var(--eco-mint) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+.back-nav {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.82rem;
+    color: var(--eco-emerald);
+    font-weight: 700;
+    text-decoration: none;
+    margin-bottom: 6px;
+    transition: color 0.2s ease;
+}
+.back-nav:hover {
+    color: var(--eco-ink);
+}
+
+.sidebar-title {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--eco-ink);
+    margin: 0;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.sidebar-content {
+    overflow-y: auto;
+    padding: 16px 20px 20px;
+}
+
+/* Custom Input Styling matching EcoNav Tokens */
+.form-label-custom {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--eco-ink);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.input-group-custom {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 14px;
+    font-size: 1rem;
+    pointer-events: none;
+    z-index: 4;
+}
+
+.form-control-custom {
+    width: 100%;
+    padding: 9px 14px 9px 40px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--ink);
+    background-color: #ffffff;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* Custom Dropdown Arrow Fix */
+.form-select-custom {
+    width: 100%;
+    padding: 9px 36px 9px 40px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--ink);
+    background-color: #ffffff;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%252355645c' class='bi bi-chevron-down' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 14px;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control-custom:focus,
+.form-select-custom:focus {
+    outline: none;
+    border-color: var(--eco-emerald);
+    box-shadow: 0 0 0 3px rgba(15, 196, 109, 0.2);
+}
+
+/* Summary Card Section (Single metric row layout) */
+.summary-section {
+    background: var(--paper);
+    border: 1.5px solid var(--line);
+    border-radius: 14px;
+    padding: 14px;
+}
+
+.summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    color: var(--eco-ink);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.summary-metrics-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.metric-row {
+    background: #ffffff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 9px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.metric-label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.emissions-val,
+.distance-val,
+.eta-val {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--route);
+    line-height: 1;
+}
+
+.eta-val {
+    color: var(--eco-deep);
+}
+
+/* Start Route Button */
+.btn-start-route {
+    background: var(--eco-emerald) !important;
+    border-color: var(--eco-emerald) !important;
+    color: #ffffff !important;
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: 0.95rem;
+    padding: 11px 18px;
+    border-radius: 50rem;
+    box-shadow: 0 8px 24px rgba(15, 196, 109, 0.3);
+    transition: all 0.25s ease;
+}
+
+.btn-start-route:hover {
+    background: var(--eco-deep) !important;
+    border-color: var(--eco-deep) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(10, 61, 42, 0.4);
+}
