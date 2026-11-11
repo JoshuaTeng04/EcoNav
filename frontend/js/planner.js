@@ -62,9 +62,9 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         try {
-          // Fetch from OpenStreetMap Nominatim
+          // Fetch from OpenStreetMap Nominatim, only for the Philippines
           const res = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`,
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&countrycodes=ph`,
           );
           const data = await res.json();
 
