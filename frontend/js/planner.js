@@ -163,15 +163,15 @@ document.addEventListener("DOMContentLoaded", function () {
         '<span class="spinner-border spinner-border-sm me-2"></span>Routing...';
       btn.disabled = true;
 
-      // Get the active value from the dropdown
-      // Get the active value from the dropdown for the Carbon filler
+      // Vehicle type from the dropdown, used by the backend for the emissions estimate
       var selectedVehicle = document.getElementById("vehicle_type").value;
 
-      // Force GraphHopper to use "car" for routing, regardless of the Sedan/SUV choice
+      // GraphHopper always routes as "car". vehicle_type only affects emissions.
       var payload = {
         origin: { latitude: originCoords[0], longitude: originCoords[1] },
         destination: { latitude: destCoords[0], longitude: destCoords[1] },
         vehicle_profile: "car",
+        vehicle_type: selectedVehicle,
       };
 
       try {
@@ -203,14 +203,15 @@ document.addEventListener("DOMContentLoaded", function () {
           etaElem.style.color = "#0d6efd";
         }
 
-        // 3. Filler for Carbon Emissions based on Sedan vs SUV
+        // 3. Carbon emissions from the Climatiq API (via the backend)
         if (emissionsElem) {
-          // Mock calculation: Sedan ~0.15 kg CO2/km | SUV ~0.25 kg CO2/km
-          let mockMultiplier = selectedVehicle === "suv" ? 0.25 : 0.15;
-          let mockEmissions = (data.distance_km * mockMultiplier).toFixed(2);
-
-          emissionsElem.innerText = `(~${mockEmissions} kg CO₂e)*`;
-          emissionsElem.style.color = "#198754";
+          if (data.emissions_kg !== null && data.emissions_kg !== undefined) {
+            emissionsElem.innerText = `(${data.emissions_kg} kg CO₂e)`;
+            emissionsElem.style.color = "#198754";
+          } else {
+            emissionsElem.innerText = "(unavailable)";
+            emissionsElem.style.color = "#6c757d";
+          }
         }
 
         // 4. Decode the GraphHopper polyline and draw it

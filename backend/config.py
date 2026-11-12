@@ -8,6 +8,10 @@ class Settings(BaseSettings):
     
     graphhopper_api_key: str = Field(..., validation_alias="GRAPHHOPPER_API_KEY")
     graphhopper_base_url: str = "https://graphhopper.com/api/1"
+
+    climatiq_api_key: str = Field(..., validation_alias="CLIMATIQ_API_KEY")
+    climatiq_base_url: str = "https://api.climatiq.io/data/v1"
+    climatiq_data_version: str = "^34"
     
     http_timeout: float = 10.0
 
