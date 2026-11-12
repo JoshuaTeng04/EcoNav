@@ -5,11 +5,10 @@ document.addEventListener("DOMContentLoaded", function () {
     zoomControl: false,
   }).setView([14.588, 120.991], 13);
 
-  // Google Maps Roadmap Tiles
-  L.tileLayer("https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
-    maxZoom: 20,
-    subdomains: ["mt0", "mt1", "mt2", "mt3"],
-    attribution: "&copy; Google Maps",
+  // OpenStreetMap Tiles
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: "&copy; OpenStreetMap contributors",
   }).addTo(map);
 
   L.control.zoom({ position: "topright" }).addTo(map);
@@ -251,7 +250,7 @@ document.addEventListener("DOMContentLoaded", function () {
             confirmButtonText: "Okay",
           });
         } else {
-          wal.fire({
+          Swal.fire({
             title: "System Error",
             text: err.message,
             icon: "error",
