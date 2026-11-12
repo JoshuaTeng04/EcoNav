@@ -19,14 +19,9 @@ class RoutePlanRequest(BaseModel):
     destination: Coordinates
     vehicle_profile: str = Field(default="car")
 
-
-# Global HTTP client for connection pooling
-http_client: httpx.AsyncClient = None
-
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Manage application startup and shutdown lifecycle events."""
-    global http_client
     app.state.http_client = httpx.AsyncClient(timeout=settings.http_timeout)
     yield
     await app.state.http_client.aclose()
