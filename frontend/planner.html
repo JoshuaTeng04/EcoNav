@@ -119,6 +119,51 @@
             </div>
           </div>
 
+          <!-- Weather Section (shows placeholders until a route is planned) -->
+          <div id="weather_section" class="summary-section mb-3">
+            <div class="summary-header">
+              <span>Weather</span>
+              <i
+                class="bi bi-info-circle text-muted"
+                title="Current weather at the starting point, and the forecast for the destination at estimated arrival"
+              ></i>
+            </div>
+
+            <div class="summary-metrics-list">
+              <div class="metric-row weather-row" id="origin_weather">
+                <span class="weather-icon weather-icon-empty"
+                  ><i class="bi bi-cloud"></i
+                ></span>
+                <div class="weather-place">
+                  <span class="metric-label">Starting Point</span>
+                  <span class="weather-condition">--</span>
+                </div>
+                <div class="weather-figures">
+                  <strong class="weather-temp">--</strong>
+                  <span class="weather-rain">--</span>
+                </div>
+              </div>
+              <div class="metric-row weather-row" id="dest_weather">
+                <span class="weather-icon weather-icon-empty"
+                  ><i class="bi bi-cloud"></i
+                ></span>
+                <div class="weather-place">
+                  <span class="metric-label">Destination</span>
+                  <span class="weather-condition">--</span>
+                </div>
+                <div class="weather-figures">
+                  <strong class="weather-temp">--</strong>
+                  <span class="weather-rain">--</span>
+                </div>
+              </div>
+            </div>
+
+            <div
+              id="rain_warning"
+              class="alert alert-warning small mt-2 mb-0 py-2 d-none"
+            ></div>
+          </div>
+
           <!-- Start Route Button -->
           <button
             type="submit"

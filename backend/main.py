@@ -1,5 +1,7 @@
+import asyncio
 import logging
 from contextlib import asynccontextmanager
+from datetime import datetime, timedelta, timezone
 from typing import AsyncGenerator, Literal
 
 import httpx
@@ -10,6 +12,7 @@ from pydantic import BaseModel, Field
 from backend.config import settings
 from backend.services.carbon import ClimatiqService
 from backend.services.graphhopper import GraphHopperService
+from backend.services.weather import OpenWeatherService
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -46,10 +49,11 @@ def health():
 
 @app.post("/api/routes/plan")
 async def plan_route(payload: RoutePlanRequest, req: Request):
-    """Plan a route with GraphHopper and estimate its emissions with Climatiq."""
+    """Plan a route, then add its emissions estimate and weather."""
     client = req.app.state.http_client
     gh_service = GraphHopperService(client)
     carbon_service = ClimatiqService(client)
+    weather_service = OpenWeatherService(client)
 
     try:
         route_data = await gh_service.get_route(
@@ -63,6 +67,7 @@ async def plan_route(payload: RoutePlanRequest, req: Request):
         # Extract the primary route from the response
         primary_path = route_data["paths"][0]
         distance_km = round(primary_path["distance"] / 1000.0, 2)
+        duration_minutes = round(primary_path["time"] / 60000.0, 2)
 
     except httpx.HTTPStatusError as exc:
         raise HTTPException(
@@ -99,11 +104,33 @@ async def plan_route(payload: RoutePlanRequest, req: Request):
     except Exception as exc:
         logger.warning("Climatiq estimate failed: %s", exc)
 
+    # Weather is optional too. Origin is checked for now (departure) and the
+    # destination for the estimated arrival time. Both calls run together.
+    weather = None
+    try:
+        arrival = datetime.now(timezone.utc) + timedelta(minutes=duration_minutes)
+        origin_weather, destination_weather = await asyncio.gather(
+            weather_service.get_current_weather(
+                payload.origin.latitude, payload.origin.longitude
+            ),
+            weather_service.get_forecast_weather(
+                payload.destination.latitude, payload.destination.longitude, arrival
+            ),
+        )
+        weather = {"origin": origin_weather, "destination": destination_weather}
+    except httpx.HTTPStatusError as exc:
+        logger.warning(
+            "OpenWeather error %s: %s", exc.response.status_code, exc.response.text
+        )
+    except Exception as exc:
+        logger.warning("OpenWeather request failed: %s", exc)
+
     return {
         "distance_km": distance_km,
-        "duration_minutes": round(primary_path["time"] / 60000.0, 2),
+        "duration_minutes": duration_minutes,
         "encoded_polyline": primary_path["points"],
         "emissions_kg": emissions_kg,
+        "weather": weather,
     }
 
 
