@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     climatiq_api_key: str = Field(..., validation_alias="CLIMATIQ_API_KEY")
     climatiq_base_url: str = "https://api.climatiq.io/data/v1"
     climatiq_data_version: str = "^34"
+
+    openweather_api_key: str = Field(..., validation_alias="OPENWEATHER_API_KEY")
+    openweather_base_url: str = "https://api.openweathermap.org/data/2.5"
     
     http_timeout: float = 10.0
 

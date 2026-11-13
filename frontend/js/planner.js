@@ -214,6 +214,56 @@ document.addEventListener("DOMContentLoaded", function () {
           }
         }
 
+        // 3b. Weather at both ends of the trip (OpenWeather, via the backend)
+        var weatherSection = document.getElementById("weather_section");
+        var rainWarning = document.getElementById("rain_warning");
+
+        // Builds one weather row: icon, place and condition, then the figures
+        const weatherHtml = (label, w) =>
+          `<img class="weather-icon" src="https://openweathermap.org/img/wn/${w.icon}@2x.png" alt="">` +
+          `<div class="weather-place">` +
+          `<span class="metric-label">${label}</span>` +
+          `<span class="weather-condition">${w.condition}</span>` +
+          `</div>` +
+          `<div class="weather-figures">` +
+          `<strong class="weather-temp">${w.temperature_c}°C</strong>` +
+          `<span class="weather-rain">${w.rain_chance_percent}% rain</span>` +
+          `</div>`;
+
+        if (weatherSection) {
+          if (data.weather) {
+            document.getElementById("origin_weather").innerHTML = weatherHtml(
+              "Starting Point",
+              data.weather.origin,
+            );
+            document.getElementById("dest_weather").innerHTML = weatherHtml(
+              "Destination",
+              data.weather.destination,
+            );
+
+            // Rain warning: name which end of the trip expects rain
+            var rainyEnds = [];
+            if (data.weather.origin.rain_expected)
+              rainyEnds.push("your starting point");
+            if (data.weather.destination.rain_expected)
+              rainyEnds.push("your destination");
+
+            if (rainyEnds.length > 0) {
+              rainWarning.innerHTML =
+                '<i class="bi bi-cloud-rain-fill me-1"></i>Rain expected at ' +
+                rainyEnds.join(" and ") +
+                ". Drive carefully.";
+              rainWarning.classList.remove("d-none");
+            } else {
+              rainWarning.classList.add("d-none");
+            }
+
+            weatherSection.classList.remove("d-none");
+          } else {
+            weatherSection.classList.add("d-none");
+          }
+        }
+
         // 4. Decode the GraphHopper polyline and draw it
         var decodedPoints = polyline.decode(data.encoded_polyline);
 
