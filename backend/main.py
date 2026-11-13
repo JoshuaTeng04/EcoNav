@@ -75,6 +75,14 @@ async def plan_route(payload: RoutePlanRequest, req: Request):
             detail=str(exc),
         )
 
+    # Reject routes that need a ferry. Bridges and tunnels are still allowed.
+    segments = primary_path.get("details", {}).get("road_environment", [])
+    if any(segment[2] == "ferry" for segment in segments):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="No valid route: this trip requires a ferry crossing.",
+        )
+
     # Emissions are optional: if Climatiq fails, the route is still returned
     # and emissions_kg stays None. The reason is logged in the terminal.
     emissions_kg = None
