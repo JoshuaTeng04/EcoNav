@@ -51,6 +51,14 @@ document.addEventListener("DOMContentLoaded", function () {
     const input = document.getElementById(inputId);
     const results = document.getElementById(resultsId);
 
+    input.addEventListener("input", () => {
+      if (isOrigin) {
+        originCoords = null;
+      } else {
+        destCoords = null;
+      }
+    });
+
     input.addEventListener(
       "input",
       debounce(async (e) => {
@@ -144,11 +152,29 @@ document.addEventListener("DOMContentLoaded", function () {
     form.addEventListener("submit", async function (e) {
       e.preventDefault();
 
-      // Halt execution if both points haven't been selected yet
-      if (!originCoords || !destCoords) {
+      // Halt execution if either or both points haven't been selected yet
+      if (!originCoords && !destCoords) {
         Swal.fire({
           title: "Missing Locations",
           text: "Please select both a Starting Point and Destination from the dropdown suggestions.",
+          icon: "warning",
+          confirmButtonColor: "#0a3d2a",
+          confirmButtonText: "Retry again",
+        });
+        return;
+      } else if (!originCoords) {
+        Swal.fire({
+          title: "Missing Starting Point",
+          text: "Please select a valid Starting Point from the dropdown suggestions.",
+          icon: "warning",
+          confirmButtonColor: "#0a3d2a",
+          confirmButtonText: "Retry again",
+        });
+        return;
+      } else if (!destCoords) {
+        Swal.fire({
+          title: "Missing Destination",
+          text: "Please select a valid Destination from the dropdown suggestions.",
           icon: "warning",
           confirmButtonColor: "#0a3d2a",
           confirmButtonText: "Retry again",
