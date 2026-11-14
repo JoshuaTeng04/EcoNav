@@ -84,7 +84,7 @@ async def plan_route(payload: RoutePlanRequest, req: Request):
     segments = primary_path.get("details", {}).get("road_environment", [])
     if any(segment[2] == "ferry" for segment in segments):
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="No valid route: this trip requires a ferry crossing.",
         )
 
