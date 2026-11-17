@@ -80,20 +80,30 @@ async def plan_route(payload: RoutePlanRequest, req: Request):
             detail=str(exc),
         )
 
-    # Reject routes that need a ferry. Bridges and tunnels are still allowed.
+    # Added for the new implementation to gracefully detect ferry segments and flag them for the frontend UI.
     segments = primary_path.get("details", {}).get("road_environment", [])
-    if any(segment[2] == "ferry" for segment in segments):
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail="No valid route: this trip requires a ferry crossing.",
+    requires_ferry = any(segment[2] == "ferry" for segment in segments)
+    
+    
+    # Added: to calculate land-only distance by subtracting ferry routes from the total distance
+    land_distance_km = distance_km
+    if requires_ferry:
+        # Sum the distance (in meters) of all turn-by-turn instructions that involve a ferry
+        ferry_distance_m = sum(
+            inst.get("distance", 0.0)
+            for inst in primary_path.get("instructions", [])
+            if "ferry" in inst.get("text", "").lower()
         )
+        # Subtract ferry distance from total distance, ensuring it doesn't drop below 0
+        land_distance_km = max(0.0, round((primary_path["distance"] - ferry_distance_m) / 1000.0, 2))
 
     # Emissions are optional: if Climatiq fails, the route is still returned
     # and emissions_kg stays None. The reason is logged in the terminal.
     emissions_kg = None
     try:
         estimate = await carbon_service.estimate_emissions(
-            distance_km=distance_km,
+            # Modified: only pass 'land_distance_km' instead of 'distance_km' to halt emissions during ferry transit
+            distance_km=land_distance_km,  # Use land-only distance for emissions
             vehicle_type=payload.vehicle_type,
         )
         emissions_kg = estimate["emissions_kg"]
@@ -131,6 +141,7 @@ async def plan_route(payload: RoutePlanRequest, req: Request):
         "encoded_polyline": primary_path["points"],
         "emissions_kg": emissions_kg,
         "weather": weather,
+        "requires_ferry": requires_ferry, # New field for the ferry implementation
     }
 
 
