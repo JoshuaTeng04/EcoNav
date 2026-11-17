@@ -24,6 +24,289 @@
     />
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="css/planner.css" />
+    <style>
+      /* Hide mobile drawer tab on tablet & desktop */
+      .mobile-drawer-tab {
+        display: none;
+      }
+
+      /* Tablet Responsive Overrides (Desktop >= 992px untouched) */
+      @media (max-width: 991.98px) and (min-width: 768px) {
+        .planner-sidebar {
+          width: min(370px, calc(100vw - 24px));
+          max-height: calc(100dvh - 24px);
+          overflow-y: auto;
+        }
+      }
+
+      /* Mobile Responsive Overrides Only */
+      @media (max-width: 767.98px) {
+        html,
+        body {
+          height: 100dvh !important;
+          width: 100vw !important;
+          overflow: hidden !important;
+          margin: 0;
+          padding: 0;
+        }
+
+        /* Full-screen interactive map underneath the white overlay */
+        #google_map {
+          position: fixed !important;
+          inset: 0 !important;
+          width: 100vw !important;
+          height: 100dvh !important;
+          z-index: 1 !important;
+        }
+
+        /* Compact white overlay panel on initial load */
+        .planner-sidebar {
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          bottom: auto !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          height: auto !important;
+          max-height: 44dvh !important;
+          margin: 0 !important;
+          padding: 0.65rem 0.9rem 0 !important;
+          border-radius: 0 0 22px 22px !important;
+          z-index: 1000 !important;
+          display: flex !important;
+          flex-direction: column !important;
+          overflow: visible !important;
+          transition: max-height 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        /* Expanded state: consume more of the screen to show all contents clearly */
+        .planner-sidebar.route-started {
+          max-height: 82dvh !important;
+          overflow-y: auto !important;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        /* Allow autocomplete dropdowns to float cleanly over map while typing */
+        .planner-sidebar.route-started:has(input:focus) {
+          overflow: visible !important;
+        }
+
+        /* Row 1: <-- Back to EcoNav (left) & Route Information (upper right) */
+        .sidebar-header {
+          display: flex !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          gap: 0.5rem !important;
+          padding-bottom: 0.4rem !important;
+          margin-bottom: 0.45rem !important;
+          flex-shrink: 0;
+        }
+
+        .sidebar-header .back-nav {
+          margin: 0 !important;
+          font-size: 0.8rem !important;
+          white-space: nowrap;
+        }
+
+        .sidebar-header .sidebar-title {
+          margin: 0 !important;
+          font-size: 1.05rem !important;
+          line-height: 1.1 !important;
+          text-align: right !important;
+          white-space: nowrap;
+        }
+
+        .sidebar-content {
+          width: 100% !important;
+          flex: 1 1 auto;
+        }
+
+        /* Full-width single-column stack so every box stretches edge-to-edge */
+        #route_planner_form {
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 0.48rem !important;
+          width: 100% !important;
+        }
+
+        /* Inline label + full-width input/select rows for From, To, and Vehicle Type */
+        #route_planner_form > div:nth-of-type(1),
+        #route_planner_form > div:nth-of-type(2),
+        #route_planner_form > div:nth-of-type(3) {
+          display: flex !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          gap: 0.55rem !important;
+          width: 100% !important;
+          margin-bottom: 0 !important;
+        }
+
+        #route_planner_form > div:nth-of-type(1) .form-label-custom,
+        #route_planner_form > div:nth-of-type(2) .form-label-custom,
+        #route_planner_form > div:nth-of-type(3) .form-label-custom {
+          flex: 0 0 88px !important;
+          width: 88px !important;
+          margin: 0 !important;
+          line-height: 1.15 !important;
+          text-align: left !important;
+        }
+
+        /* Shorten From/To labels cleanly to match row rhythm */
+        #route_planner_form > div:nth-of-type(1) .form-label-custom,
+        #route_planner_form > div:nth-of-type(2) .form-label-custom {
+          font-size: 0 !important;
+        }
+
+        #route_planner_form > div:nth-of-type(1) .form-label-custom::before {
+          content: "From";
+          font-size: 0.74rem;
+          font-weight: 700;
+          text-transform: uppercase;
+        }
+
+        #route_planner_form > div:nth-of-type(2) .form-label-custom::before {
+          content: "To";
+          font-size: 0.74rem;
+          font-weight: 700;
+          text-transform: uppercase;
+        }
+
+        /* Vehicle Type label */
+        #route_planner_form > div:nth-of-type(3) .form-label-custom {
+          font-size: 0.72rem !important;
+          font-weight: 700 !important;
+          text-transform: uppercase !important;
+          white-space: nowrap;
+        }
+
+        /* Full remaining width for From input, To input, and Vehicle Type dropdown */
+        #route_planner_form > div:nth-of-type(1) .input-group-custom,
+        #route_planner_form > div:nth-of-type(2) .input-group-custom,
+        #route_planner_form > div:nth-of-type(3) .input-group-custom {
+          flex: 1 1 auto !important;
+          width: auto !important;
+          min-width: 0 !important;
+          height: 36px !important;
+          min-height: 36px !important;
+          padding-top: 0 !important;
+          padding-bottom: 0 !important;
+        }
+
+        /* Prevent iOS Safari auto-zoom while keeping controls sleek */
+        .form-control-custom,
+        .form-select-custom {
+          font-size: 16px !important;
+          padding-top: 0.15rem !important;
+          padding-bottom: 0.15rem !important;
+        }
+
+        /* Autocomplete results aligned to the input column */
+        .autocomplete-results {
+          position: absolute !important;
+          left: 96px !important;
+          right: 0 !important;
+          top: calc(100% + 4px) !important;
+          max-height: 210px;
+          overflow-y: auto;
+          z-index: 1200 !important;
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+        }
+
+        /* Hide Summary & Weather before expanding */
+        .planner-sidebar:not(.route-started) .summary-section {
+          display: none !important;
+        }
+
+        /* Expanded Summary & Weather boxes: full width across the white overlay */
+        .planner-sidebar.route-started .summary-section {
+          display: block !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          margin: 0.15rem 0 0 0 !important;
+          padding: 0.75rem 0.85rem !important;
+          box-sizing: border-box !important;
+        }
+
+        .planner-sidebar.route-started .summary-header {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          margin-bottom: 0.5rem !important;
+          font-size: 0.85rem !important;
+        }
+
+        .planner-sidebar.route-started .summary-metrics-list {
+          width: 100% !important;
+        }
+
+        .planner-sidebar.route-started .metric-row {
+          width: 100% !important;
+          padding: 0.45rem 0.7rem !important;
+          font-size: 0.86rem !important;
+        }
+
+        /* Start Route / Calculate Route button: full width at the bottom of the form */
+        #start_route_btn {
+          width: 100% !important;
+          height: 40px !important;
+          min-height: 40px !important;
+          margin-top: 0.15rem !important;
+          padding: 0 1rem !important;
+          font-size: 0.92rem !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+
+        /* Creative bottom arrow handle tab */
+        .mobile-drawer-tab {
+          display: flex !important;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          padding: 0.4rem 0 0.5rem;
+          margin-top: 0.35rem;
+          background-color: #ffffff;
+          border: none;
+          border-top: 1px solid rgba(15, 42, 30, 0.06);
+          border-radius: 0 0 22px 22px;
+          cursor: pointer;
+          flex-shrink: 0;
+          position: sticky;
+          bottom: 0;
+          z-index: 10;
+        }
+
+        .drawer-tab-pill {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 48px;
+          height: 22px;
+          border-radius: 999px;
+          background: #eaf5ee;
+          color: #154731;
+          border: 1px solid rgba(21, 71, 49, 0.16);
+          box-shadow: 0 2px 6px rgba(15, 42, 30, 0.08);
+          transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .mobile-drawer-tab:active .drawer-tab-pill {
+          background: #d8eddf;
+          transform: scale(0.95);
+        }
+
+        .drawer-arrow {
+          transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .planner-sidebar.route-started .drawer-arrow {
+          transform: rotate(180deg);
+        }
+      }
+    </style>
   </head>
   <body>
     <!-- Floating EcoNav Sidebar (Sized tightly to fit content) -->
@@ -174,6 +457,32 @@
           </button>
         </form>
       </div>
+
+      <!-- Mobile-only bottom arrow handle tab -->
+      <button
+        type="button"
+        id="mobile_drawer_toggle"
+        class="mobile-drawer-tab"
+        aria-expanded="false"
+        aria-label="Expand route details"
+      >
+        <span class="drawer-tab-pill">
+          <svg
+            class="drawer-arrow"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </span>
+      </button>
     </aside>
 
     <!-- Google Map Container -->
@@ -185,5 +494,83 @@
     <!-- SweetAlert2 for error messages -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="js/planner.js"></script>
+    <script>
+      // Mobile-only state toggle: expand summary/weather, update button label, and animate arrow handle
+      (function () {
+        const sidebar = document.querySelector(".planner-sidebar");
+        const form = document.getElementById("route_planner_form");
+        const fromInput = document.getElementById("from_input");
+        const toInput = document.getElementById("to_input");
+        const startBtn = document.getElementById("start_route_btn");
+        const drawerTab = document.getElementById("mobile_drawer_toggle");
+        const emissionsVal = document.querySelector(".emissions-val");
+        if (!sidebar || !form || !drawerTab) return;
+
+        let hasCalculatedOnce = false;
+
+        function syncButtonText() {
+          if (!startBtn || window.innerWidth >= 768) return;
+          if (hasCalculatedOnce && startBtn.textContent.includes("Start Route")) {
+            startBtn.innerHTML =
+              '<i class="bi bi-calculator-fill me-2"></i>Calculate Route';
+          }
+        }
+
+        function setExpanded(expanded) {
+          sidebar.classList.toggle("route-started", expanded);
+          drawerTab.setAttribute("aria-expanded", String(expanded));
+          drawerTab.setAttribute(
+            "aria-label",
+            expanded ? "Close route details" : "Expand route details"
+          );
+          if (expanded) {
+            syncButtonText();
+          }
+        }
+
+        drawerTab.addEventListener("click", function () {
+          const isOpen = sidebar.classList.contains("route-started");
+          setExpanded(!isOpen);
+        });
+
+        form.addEventListener("submit", function () {
+          if (
+            fromInput &&
+            toInput &&
+            fromInput.value.trim() &&
+            toInput.value.trim()
+          ) {
+            hasCalculatedOnce = true;
+            setExpanded(true);
+          }
+        });
+
+        if (startBtn && "MutationObserver" in window) {
+          const btnObserver = new MutationObserver(function () {
+            syncButtonText();
+          });
+          btnObserver.observe(startBtn, {
+            childList: true,
+            characterData: true,
+            subtree: true,
+          });
+        }
+
+        if (emissionsVal && "MutationObserver" in window) {
+          const metricsObserver = new MutationObserver(function () {
+            const txt = emissionsVal.textContent.trim();
+            if (txt && txt !== "--") {
+              hasCalculatedOnce = true;
+              setExpanded(true);
+            }
+          });
+          metricsObserver.observe(emissionsVal, {
+            childList: true,
+            characterData: true,
+            subtree: true,
+          });
+        }
+      })();
+    </script>
   </body>
 </html>
