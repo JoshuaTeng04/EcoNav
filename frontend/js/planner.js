@@ -284,6 +284,16 @@ document.addEventListener("DOMContentLoaded", function () {
               rainWarning.classList.add("d-none");
             }
 
+            // Toggle the Ferry Warning badge if the backend detects a water crossing
+            var ferryWarning = document.getElementById("ferry_warning");
+            if (ferryWarning) {
+              if (data.requires_ferry) {
+                ferryWarning.classList.remove("d-none");
+              } else {
+                ferryWarning.classList.add("d-none");
+              }
+            }
+
             weatherSection.classList.remove("d-none");
           } else {
             weatherSection.classList.add("d-none");
