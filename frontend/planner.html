@@ -24,6 +24,238 @@
     />
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="css/planner.css" />
+    <style>
+      /* Tablet Responsive Overrides (Desktop >= 992px untouched) */
+      @media (max-width: 991.98px) and (min-width: 768px) {
+        .planner-sidebar {
+          width: min(370px, calc(100vw - 24px));
+          max-height: calc(100dvh - 24px);
+          overflow-y: auto;
+        }
+      }
+
+      /* Mobile Responsive Overrides Only */
+      @media (max-width: 767.98px) {
+        html,
+        body {
+          height: 100dvh !important;
+          width: 100vw !important;
+          overflow: hidden !important;
+          margin: 0;
+          padding: 0;
+        }
+
+        /* Full-screen interactive map underneath the white overlay */
+        #google_map {
+          position: fixed !important;
+          inset: 0 !important;
+          width: 100vw !important;
+          height: 100dvh !important;
+          z-index: 1 !important;
+        }
+
+        /* White overlay panel: 1/4 (25dvh) of screen when opened */
+        .planner-sidebar {
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          bottom: auto !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          height: 25dvh !important;
+          min-height: 185px !important;
+          max-height: 28dvh !important;
+          margin: 0 !important;
+          padding: 0.6rem 0.85rem 0.7rem !important;
+          border-radius: 0 0 20px 20px !important;
+          z-index: 1000 !important;
+          display: flex !important;
+          flex-direction: column !important;
+          justify-content: space-between !important;
+          overflow: visible !important;
+          transition: height 0.28s ease, max-height 0.28s ease;
+        }
+
+        /* Expanded state after Start Route is clicked: strictly 45% of screen */
+        .planner-sidebar.route-started {
+          height: 45dvh !important;
+          min-height: 45dvh !important;
+          max-height: 45dvh !important;
+          justify-content: flex-start !important;
+          overflow-y: auto !important;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        /* Allow autocomplete dropdowns to extend cleanly over map while typing */
+        .planner-sidebar.route-started:has(input:focus) {
+          overflow: visible !important;
+        }
+
+        /* Row 1: <-- Back to EcoNav (left) & Route Information (upper right) */
+        .sidebar-header {
+          display: flex !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          gap: 0.5rem !important;
+          padding-bottom: 0.35rem !important;
+          margin-bottom: 0.35rem !important;
+          flex-shrink: 0;
+        }
+
+        .sidebar-header .back-nav {
+          margin: 0 !important;
+          font-size: 0.78rem !important;
+          white-space: nowrap;
+        }
+
+        .sidebar-header .sidebar-title {
+          margin: 0 !important;
+          font-size: 1rem !important;
+          line-height: 1.1 !important;
+          text-align: right !important;
+          white-space: nowrap;
+        }
+
+        .sidebar-content {
+          flex: 1 1 auto;
+          display: flex;
+          flex-direction: column;
+        }
+
+        /* Grid layout for the 3 form rows */
+        #route_planner_form {
+          display: grid !important;
+          grid-template-columns: 1fr 1fr;
+          column-gap: 0.5rem;
+          row-gap: 0.4rem;
+          align-items: center;
+        }
+
+        /* Row 2 (From) & Row 3 (To): full width row with label on left, input on right */
+        #route_planner_form > div:nth-of-type(1),
+        #route_planner_form > div:nth-of-type(2) {
+          grid-column: 1 / -1;
+          display: flex !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          gap: 0.5rem;
+          margin-bottom: 0 !important;
+        }
+
+        #route_planner_form > div:nth-of-type(1) .form-label-custom,
+        #route_planner_form > div:nth-of-type(2) .form-label-custom {
+          flex: 0 0 42px;
+          margin: 0 !important;
+          font-size: 0 !important;
+          line-height: 1;
+        }
+
+        #route_planner_form > div:nth-of-type(1) .form-label-custom::before {
+          content: "From";
+          font-size: 0.78rem;
+          font-weight: 700;
+          text-transform: uppercase;
+        }
+
+        #route_planner_form > div:nth-of-type(2) .form-label-custom::before {
+          content: "To";
+          font-size: 0.78rem;
+          font-weight: 700;
+          text-transform: uppercase;
+        }
+
+        #route_planner_form > div:nth-of-type(1) .input-group-custom,
+        #route_planner_form > div:nth-of-type(2) .input-group-custom {
+          flex: 1 1 auto;
+          min-width: 0;
+          height: 34px !important;
+          min-height: 34px !important;
+          padding-top: 0 !important;
+          padding-bottom: 0 !important;
+        }
+
+        /* Row 4 Left: Vehicle Type entry */
+        #route_planner_form > div:nth-of-type(3) {
+          grid-column: 1;
+          margin-bottom: 0 !important;
+        }
+
+        #route_planner_form > div:nth-of-type(3) .form-label-custom {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+        }
+
+        #route_planner_form > div:nth-of-type(3) .input-group-custom {
+          height: 36px !important;
+          min-height: 36px !important;
+          padding-top: 0 !important;
+          padding-bottom: 0 !important;
+        }
+
+        /* Row 4 Right: Start Route button */
+        #start_route_btn {
+          grid-column: 2;
+          height: 36px !important;
+          min-height: 36px !important;
+          padding: 0 0.75rem !important;
+          font-size: 0.85rem !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          white-space: nowrap;
+        }
+
+        /* Prevent iOS Safari auto-zoom while keeping inputs compact */
+        .form-control-custom,
+        .form-select-custom {
+          font-size: 16px !important;
+          padding-top: 0.15rem !important;
+          padding-bottom: 0.15rem !important;
+        }
+
+        /* Autocomplete results drop cleanly over map */
+        .autocomplete-results {
+          position: absolute !important;
+          left: 42px !important;
+          right: 0 !important;
+          top: calc(100% + 4px) !important;
+          max-height: 210px;
+          overflow-y: auto;
+          z-index: 1150 !important;
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+        }
+
+        /* Hide Route Summary & Weather until Start Route is clicked */
+        .planner-sidebar:not(.route-started) .summary-section {
+          display: none !important;
+        }
+
+        /* Show compact Route Summary & Weather inside the 45% sheet after Start Route */
+        .planner-sidebar.route-started .summary-section {
+          grid-column: 1 / -1;
+          display: block !important;
+          margin-top: 0.45rem !important;
+          margin-bottom: 0.25rem !important;
+          padding: 0.55rem 0.75rem !important;
+        }
+
+        .planner-sidebar.route-started .summary-header {
+          margin-bottom: 0.35rem !important;
+          font-size: 0.8rem !important;
+        }
+
+        .planner-sidebar.route-started .metric-row {
+          padding: 0.35rem 0.6rem !important;
+          font-size: 0.82rem !important;
+        }
+      }
+    </style>
   </head>
   <body>
     <!-- Floating EcoNav Sidebar (Sized tightly to fit content) -->
@@ -185,5 +417,37 @@
     <!-- SweetAlert2 for error messages -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="js/planner.js"></script>
+    <script>
+      // Mobile-only state toggle: reveal summary & expand panel to 45% when route starts
+      (function () {
+        const sidebar = document.querySelector(".planner-sidebar");
+        const form = document.getElementById("route_planner_form");
+        const fromInput = document.getElementById("from_input");
+        const toInput = document.getElementById("to_input");
+        const emissionsVal = document.querySelector(".emissions-val");
+        if (!sidebar || !form) return;
+
+        function revealSummary() {
+          sidebar.classList.add("route-started");
+        }
+
+        form.addEventListener("submit", function () {
+          if (fromInput && toInput && fromInput.value.trim() && toInput.value.trim()) {
+            revealSummary();
+          }
+        });
+
+        // Also reveal automatically once route metrics populate from planner.js
+        if (emissionsVal && "MutationObserver" in window) {
+          const observer = new MutationObserver(function () {
+            const txt = emissionsVal.textContent.trim();
+            if (txt && txt !== "--") {
+              revealSummary();
+            }
+          });
+          observer.observe(emissionsVal, { childList: true, characterData: true, subtree: true });
+        }
+      })();
+    </script>
   </body>
 </html>
