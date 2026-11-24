@@ -290,7 +290,9 @@
           color: #154731;
           border: 1px solid rgba(21, 71, 49, 0.16);
           box-shadow: 0 2px 6px rgba(15, 42, 30, 0.08);
-          transition: background-color 0.2s ease, transform 0.2s ease;
+          transition:
+            background-color 0.2s ease,
+            transform 0.2s ease;
         }
 
         .mobile-drawer-tab:active .drawer-tab-pill {
@@ -402,6 +404,23 @@
             </div>
           </div>
 
+          <!-- Ferry notifaction, will only show if the route requires a ferry transfer  -->
+          <div
+            id="ferry_warning"
+            class="alert alert-info d-none mt-2 mb-2 p-2 text-center"
+            style="
+              background-color: #cff4fc;
+              color: #055160;
+              border-radius: 8px;
+            "
+          >
+            <strong>🚢 Ferry Transfer Required</strong><br />
+            <small
+              >This route includes an inter-island Roll-on/Roll-off
+              crossing.</small
+            >
+          </div>
+
           <!-- Weather Section (shows placeholders until a route is planned) -->
           <div id="weather_section" class="summary-section mb-3">
             <div class="summary-header">
@@ -510,7 +529,10 @@
 
         function syncButtonText() {
           if (!startBtn || window.innerWidth >= 768) return;
-          if (hasCalculatedOnce && startBtn.textContent.includes("Start Route")) {
+          if (
+            hasCalculatedOnce &&
+            startBtn.textContent.includes("Start Route")
+          ) {
             startBtn.innerHTML =
               '<i class="bi bi-calculator-fill me-2"></i>Calculate Route';
           }
@@ -521,7 +543,7 @@
           drawerTab.setAttribute("aria-expanded", String(expanded));
           drawerTab.setAttribute(
             "aria-label",
-            expanded ? "Close route details" : "Expand route details"
+            expanded ? "Close route details" : "Expand route details",
           );
           if (expanded) {
             syncButtonText();
