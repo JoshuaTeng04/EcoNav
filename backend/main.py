@@ -80,22 +80,27 @@ async def plan_route(payload: RoutePlanRequest, req: Request):
             detail=str(exc),
         )
 
-    # Added for the new implementation to gracefully detect ferry segments and flag them for the frontend UI.
-    segments = primary_path.get("details", {}).get("road_environment", [])
-    requires_ferry = any(segment[2] == "ferry" for segment in segments)
-    
-    
-    # Added: to calculate land-only distance by subtracting ferry routes from the total distance
+    # Detect ferry segments so the frontend can show a ferry notice.
+    details = primary_path.get("details", {})
+    ferry_ranges = [
+        (start, end)
+        for start, end, environment in details.get("road_environment", [])
+        if environment == "ferry"
+    ]
+    requires_ferry = bool(ferry_ranges)
+
+    # Land-only distance for emissions: subtract every road segment that lies
+    # inside a ferry range, since the engine is off during the crossing.
     land_distance_km = distance_km
     if requires_ferry:
-        # Sum the distance (in meters) of all turn-by-turn instructions that involve a ferry
         ferry_distance_m = sum(
-            inst.get("distance", 0.0)
-            for inst in primary_path.get("instructions", [])
-            if "ferry" in inst.get("text", "").lower()
+            meters
+            for start, end, meters in details.get("distance", [])
+            if any(f_start <= start and end <= f_end for f_start, f_end in ferry_ranges)
         )
-        # Subtract ferry distance from total distance, ensuring it doesn't drop below 0
-        land_distance_km = max(0.0, round((primary_path["distance"] - ferry_distance_m) / 1000.0, 2))
+        land_distance_km = max(
+            0.0, round((primary_path["distance"] - ferry_distance_m) / 1000.0, 2)
+        )
 
     # Emissions are optional: if Climatiq fails, the route is still returned
     # and emissions_kg stays None. The reason is logged in the terminal.

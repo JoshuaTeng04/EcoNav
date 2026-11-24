@@ -69,11 +69,27 @@ def test_rejects_invalid_latitude(client):
     assert response.status_code == 422
 
 
-def test_blocks_ferry_routes(client, monkeypatch):
+def test_flags_ferry_routes(client, monkeypatch):
+    """A route with a ferry is still returned, but flagged so the planner can warn the user."""
+
+    async def fake_emissions(self, distance_km, vehicle_type):
+        return {"emissions_kg": 0.77}
+
+    async def fake_current(self, lat, lon):
+        return FAKE_WEATHER
+
+    async def fake_forecast(self, lat, lon, when):
+        return FAKE_WEATHER
+
     monkeypatch.setattr(main.GraphHopperService, "get_route", fake_route("ferry"))
+    monkeypatch.setattr(main.ClimatiqService, "estimate_emissions", fake_emissions)
+    monkeypatch.setattr(main.OpenWeatherService, "get_current_weather", fake_current)
+    monkeypatch.setattr(main.OpenWeatherService, "get_forecast_weather", fake_forecast)
+
     response = client.post("/api/routes/plan", json=VALID_PAYLOAD)
-    assert response.status_code == 422
-    assert "No valid route" in response.json()["detail"]
+
+    assert response.status_code == 200
+    assert response.json()["requires_ferry"] is True
 
 
 def test_returns_route_with_emissions_and_weather(client, monkeypatch):

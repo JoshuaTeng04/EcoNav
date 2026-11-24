@@ -31,6 +31,7 @@ class GraphHopperService:
             ("calc_points", "true"),
             ("points_encoded", "true"),
             ("details", "road_environment"),
+            ("details", "distance"),
             ("key", self.api_key),
         ]
 
